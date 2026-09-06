@@ -29,6 +29,7 @@ jobs:
       - run: npm ci
       - run: CI=true npm test
   build-and-deploy:
+    if: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' }}
     needs: [lint, test]
     runs-on: ubuntu-latest
     defaults:
