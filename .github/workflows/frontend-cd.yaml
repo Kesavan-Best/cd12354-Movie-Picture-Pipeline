@@ -63,4 +63,3 @@ jobs:
           cd k8s
           kustomize edit set image frontend=$ECR_REGISTRY/frontend:$IMAGE_TAG
           kustomize build . | kubectl apply -f -
-ENDOFFILE
