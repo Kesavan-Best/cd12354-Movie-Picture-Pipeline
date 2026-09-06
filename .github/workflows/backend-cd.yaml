@@ -31,6 +31,8 @@ jobs:
       - run: pipenv install --dev
       - run: pipenv run test
   build-and-deploy:
+    permissions:
+      contents: read
     needs: [lint, test]
     runs-on: ubuntu-latest
     defaults:
@@ -38,16 +40,31 @@ jobs:
         working-directory: starter/backend
     steps:
       - uses: actions/checkout@v4
+      - name: Check AWS deployment credentials
+        id: aws-creds
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "AWS credentials not set; skipping deployment steps."
+          fi
       - name: Configure AWS credentials
+        if: steps.aws-creds.outputs.available == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       - name: Login to Amazon ECR
+        if: steps.aws-creds.outputs.available == 'true'
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
       - name: Build and push image
+        if: steps.aws-creds.outputs.available == 'true'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
@@ -55,8 +72,10 @@ jobs:
           docker build -t $ECR_REGISTRY/backend:$IMAGE_TAG .
           docker push $ECR_REGISTRY/backend:$IMAGE_TAG
       - name: Update kubeconfig
+        if: steps.aws-creds.outputs.available == 'true'
         run: aws eks update-kubeconfig --name cluster --region us-east-1
       - name: Deploy to EKS
+        if: steps.aws-creds.outputs.available == 'true'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
