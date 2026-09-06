@@ -12,7 +12,7 @@ def test_movies_endpoint_returns_200():
 def test_movies_endpoint_returns_json():
     with app.test_client() as client:
         response = client.get("/movies/")
-        assert response.content_type == "application/xml"
+        assert response.content_type == "application/json"
 
 
 def test_movies_endpoint_returns_valid_data():
