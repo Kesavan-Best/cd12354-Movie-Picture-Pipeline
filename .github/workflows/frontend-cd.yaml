@@ -1,4 +1,3 @@
-cat > .github/workflows/frontend-cd.yaml << 'ENDOFFILE'
 name: Frontend Continuous Deployment
 on:
   push:

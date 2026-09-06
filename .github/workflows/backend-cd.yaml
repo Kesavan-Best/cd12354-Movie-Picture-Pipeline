@@ -1,4 +1,3 @@
-cat > .github/workflows/backend-cd.yaml << 'ENDOFFILE'
 name: Backend Continuous Deployment
 on:
   push:
