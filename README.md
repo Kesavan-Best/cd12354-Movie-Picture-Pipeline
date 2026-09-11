@@ -149,7 +149,10 @@ In the repository on GitHub, add these **Actions secrets** under `Settings > Sec
 
 * `AWS_ACCESS_KEY_ID` - the access key for `github-action-user`
 * `AWS_SECRET_ACCESS_KEY` - the matching secret access key
+* `AWS_SESSION_TOKEN` - optional; required when using temporary AWS credentials
 * `REACT_APP_MOVIE_API_URL` - the deployed backend load balancer URL, for example `http://backend.example.com`
+
+Use the access key and secret from the same IAM key creation. If the access key starts with `ASIA`, it is temporary and the matching session token must also be added. For GitHub Actions, prefer creating a permanent access key for `github-action-user`; do not paste the temporary credentials exported by Cloud Gateway unless you also provide their session token.
 
 The workflows use `us-east-1` and `cluster` by default, matching the Terraform configuration. If your environment uses different values, add the **Actions variables** `AWS_REGION` and `EKS_CLUSTER_NAME`.
 
